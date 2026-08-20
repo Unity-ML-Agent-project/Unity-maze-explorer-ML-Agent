@@ -10,6 +10,8 @@ public class MazeAgent : Agent
     [SerializeField, Tooltip("Remember to set vector observations to 0")]
     private bool useVectorObs;
     [SerializeField]
+    private bool useHybridObs;
+    [SerializeField]
     private float step = 3.75f;
     [SerializeField]
     private int mazeCountToChange = 5;
@@ -91,12 +93,33 @@ public class MazeAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        base.CollectObservations(sensor);
+        base.CollectObservations(sensor); // 收集剩餘步數等基底觀察值
 
         if(useVectorObs)
         {
+            // 原版 Vector 邏輯
             sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
             sensor.AddObservation(this.transform.localPosition);
+        }
+        else if(useHybridObs)
+        {
+            // 【進階消融實驗版：Raycast + 正規化絕對座標 + 時間】
+
+            // 1. 加入原版的射線偵測數值 (四周牆壁 BitMask) -> 佔用 1 維
+            sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
+            
+            // 2. 抓取動態地圖邊界 (為了把座標壓縮到 -1.0 ~ 1.0)
+            GameController gc = transform.GetComponentInParent<GameController>();
+            // 注意：這裡的 3.75f 是假設你迷宮一個單元的寬度，請確認這是否符合你的環境尺寸
+            float maxMazeWidth = gc.sizeCols * 3.75f; 
+            float maxMazeHeight = gc.sizeRows * 3.75f;
+
+            // 3. 傳入「正規化後」的 X 與 Z 絕對座標 -> 佔用 2 維
+            sensor.AddObservation(this.transform.localPosition.x / maxMazeWidth);
+            sensor.AddObservation(this.transform.localPosition.z / maxMazeHeight);
+
+            // 4. 傳入時間維度特徵 -> 佔用 1 維
+            sensor.AddObservation((float)stepsUntilZero / MaxStep);
         }
     }
 
