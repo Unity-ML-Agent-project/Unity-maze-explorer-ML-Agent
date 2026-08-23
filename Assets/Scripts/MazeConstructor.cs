@@ -307,7 +307,9 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// Shoots a raycast at each possible "square" of the maze and collects the positions which are empty
+    /// Shoots a raycast at each possible "square" of the maze and collects the positions which are
+    /// both open floor and actually reachable from the start cell, so a goal never spawns in a
+    /// pocket that the random wall placement sealed off.
     /// </summary>
     /// <param name="raycastOrigin"></param>
     /// <returns></returns>
@@ -315,6 +317,8 @@ public class MazeConstructor : MonoBehaviour
     {
         int sizeCols = GetComponent<GameController>().sizeCols;
         int sizeRows = GetComponent<GameController>().sizeRows;
+
+        bool[,] reachable = GetReachableCells(sizeRows, sizeCols);
 
         List<Vector3> goalLocations = new List<Vector3>();
         RaycastHit hit;
@@ -326,7 +330,7 @@ public class MazeConstructor : MonoBehaviour
             for(int j = 1; j <= sizeCols; j++)
             {
                 raycastOrigin.x += width;
-                if(Physics.Raycast(raycastOrigin, Vector3.down, out hit, 6))
+                if(reachable[i, j] && Physics.Raycast(raycastOrigin, Vector3.down, out hit, 6))
                 {
                     if(hit.transform.tag == "Wall")
                     {
@@ -338,6 +342,44 @@ public class MazeConstructor : MonoBehaviour
         }
 
         return goalLocations;
+    }
+
+    /// <summary>
+    /// Flood-fills outward from the fixed start cell (1,1) over `data` to find every cell that is
+    /// actually walkable from the start, since the wall generator gives no such guarantee on its own.
+    /// </summary>
+    /// <param name="sizeRows"></param>
+    /// <param name="sizeCols"></param>
+    /// <returns>A grid, sized to match the goal-search loop, where true means reachable from start.</returns>
+    private bool[,] GetReachableCells(int sizeRows, int sizeCols)
+    {
+        bool[,] visited = new bool[sizeRows + 1, sizeCols + 1];
+        int rMax = data.GetUpperBound(0);
+        int cMax = data.GetUpperBound(1);
+
+        Queue<Vector2Int> frontier = new Queue<Vector2Int>();
+        frontier.Enqueue(new Vector2Int(1, 1));
+        visited[1, 1] = true;
+
+        Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+        while(frontier.Count > 0)
+        {
+            Vector2Int cell = frontier.Dequeue();
+            foreach(Vector2Int dir in directions)
+            {
+                int ni = cell.x + dir.x;
+                int nj = cell.y + dir.y;
+
+                if(ni < 0 || ni > rMax || nj < 0 || nj > cMax) continue;
+                if(visited[ni, nj] || data[ni, nj] == 1) continue;
+
+                visited[ni, nj] = true;
+                frontier.Enqueue(new Vector2Int(ni, nj));
+            }
+        }
+
+        return visited;
     }
     
     void OnGUI()
