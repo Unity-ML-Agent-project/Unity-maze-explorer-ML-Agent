@@ -270,7 +270,11 @@ public class MazeConstructor : MonoBehaviour
             go.transform.SetParent(location);
             location.GetComponentInChildren<MazeAgent>().goals.Add(go.transform);
             go.transform.SetParent(location.GetChild(2));
-            go.transform.localPosition = RandomizeGoalPlacement(location);
+            // RandomizeGoalPlacement returns a position local to the environment root
+            // (matching how the maze mesh and start trigger are placed), but `go` is
+            // actually parented under the "Goals" child - go through TransformPoint so
+            // this lands correctly regardless of any offset "Goals" has from the root.
+            go.transform.position = location.TransformPoint(RandomizeGoalPlacement(location));
         }
         go.name = "Treasure";
         go.tag = "Goal";
@@ -317,7 +321,7 @@ public class MazeConstructor : MonoBehaviour
     {
         if(randomizeGoals)
         {
-            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position, environment.GetSiblingIndex());
+            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.GetSiblingIndex());
             // If nothing reachable turned up (a heavily walled-off maze), fall back to the
             // start cell itself - guaranteed open and reachable, unlike the fixed corner
             // used below, which isn't reachability-checked at all.
@@ -333,14 +337,13 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// Walks each possible "square" of the maze and collects the positions which are reachable
-    /// from the start cell, reading straight from that environment's own maze data instead of
-    /// raycasting against the rendered mesh.
+    /// Walks each possible "square" of the maze and collects the positions - local to the
+    /// environment root, matching how the maze mesh and start trigger are placed - which are
+    /// reachable from the start cell, reading straight from that environment's own maze data.
     /// </summary>
-    /// <param name="origin"></param>
     /// <param name="environment"></param>
     /// <returns></returns>
-    private List<Vector3> CollectPossibleGoalLocations(Vector3 origin, int environment)
+    private List<Vector3> CollectPossibleGoalLocations(int environment)
     {
         // Read the size straight off this environment's own maze array rather than
         // GameController's current sizeRows/sizeCols - those are shared, global curriculum
@@ -356,16 +359,13 @@ public class MazeConstructor : MonoBehaviour
 
         for(int i = 1; i <= sizeRows; i++)
         {
-            origin.z += width;
             for(int j = 1; j <= sizeCols; j++)
             {
-                origin.x += width;
                 if(reachable[i, j])
                 {
-                    goalLocations.Add(new Vector3(origin.x, 1.5f, origin.z));
+                    goalLocations.Add(new Vector3(j * width, 1.5f, i * width));
                 }
             }
-            origin.x -= width*sizeCols;
         }
 
         return goalLocations;
