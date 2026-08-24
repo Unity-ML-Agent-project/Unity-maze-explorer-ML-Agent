@@ -18,7 +18,15 @@ public class MazeConstructor : MonoBehaviour
     private MazeDataGenerator dataGenerator;
     private MazeMeshGenerator meshGenerator;
     private Transform[] environments;
-    
+
+    // Snapshot of each environment's own maze layout, keyed by environment index.
+    // `data` below is reused/overwritten as a scratch field while generating each
+    // environment in turn, so anything that needs a specific environment's layout
+    // later (e.g. goal reachability, checked well after generation) must read from
+    // here instead - reading `data` directly can pick up whichever environment most
+    // recently regenerated its maze.
+    private int[][,] environmentMazeData;
+
     private int cols, rows;
 
     public int[,] data
@@ -44,6 +52,8 @@ public class MazeConstructor : MonoBehaviour
             environments[i] = transform.GetChild(i);
         }
 
+        environmentMazeData = new int[environments.Length][,];
+
         if(!randomizeGoals) goalCount = 1;
     }
     
@@ -67,6 +77,7 @@ public class MazeConstructor : MonoBehaviour
             DisposeSingleOldMaze(envi.GetSiblingIndex());
 
             data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+            environmentMazeData[envi.GetSiblingIndex()] = data;
 
             DisplaySingleMaze(envi.GetSiblingIndex());
 
@@ -96,6 +107,7 @@ public class MazeConstructor : MonoBehaviour
         DisposeSingleOldMaze(environment);
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        environmentMazeData[environment] = data;
 
         DisplaySingleMaze(environment);
 
@@ -121,6 +133,12 @@ public class MazeConstructor : MonoBehaviour
         cols = sizeCols;
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        // Examination mode copies one maze layout into every environment, so they
+        // all genuinely share this same data.
+        for(int i = 0; i < environments.Length; i++)
+        {
+            environmentMazeData[i] = data;
+        }
 
         DisplayExaminationMazes();
 
@@ -299,11 +317,12 @@ public class MazeConstructor : MonoBehaviour
     {
         if(randomizeGoals)
         {
-            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position);
+            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position, environment.GetSiblingIndex());
+            if(goalLocations.Count == 0) return new Vector3(width*rows, 1.5f, width*(cols-4));
             return goalLocations[Random.Range(0, goalLocations.Count)];
         }
         else return new Vector3(width*rows, 1.5f, width*(cols-4));
-        
+
     }
 
     /// <summary>
@@ -312,13 +331,14 @@ public class MazeConstructor : MonoBehaviour
     /// pocket that the random wall placement sealed off.
     /// </summary>
     /// <param name="raycastOrigin"></param>
+    /// <param name="environment"></param>
     /// <returns></returns>
-    private List<Vector3> CollectPossibleGoalLocations(Vector3 raycastOrigin)
+    private List<Vector3> CollectPossibleGoalLocations(Vector3 raycastOrigin, int environment)
     {
         int sizeCols = GetComponent<GameController>().sizeCols;
         int sizeRows = GetComponent<GameController>().sizeRows;
 
-        bool[,] reachable = GetReachableCells(sizeRows, sizeCols);
+        bool[,] reachable = GetReachableCells(environmentMazeData[environment], sizeRows, sizeCols);
 
         List<Vector3> goalLocations = new List<Vector3>();
         RaycastHit hit;
@@ -345,17 +365,19 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// Flood-fills outward from the fixed start cell (1,1) over `data` to find every cell that is
-    /// actually walkable from the start, since the wall generator gives no such guarantee on its own.
+    /// Flood-fills outward from the fixed start cell (1,1) over the given maze to find every cell
+    /// that is actually walkable from the start, since the wall generator gives no such guarantee
+    /// on its own.
     /// </summary>
+    /// <param name="maze"></param>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
     /// <returns>A grid, sized to match the goal-search loop, where true means reachable from start.</returns>
-    private bool[,] GetReachableCells(int sizeRows, int sizeCols)
+    private bool[,] GetReachableCells(int[,] maze, int sizeRows, int sizeCols)
     {
         bool[,] visited = new bool[sizeRows + 1, sizeCols + 1];
-        int rMax = data.GetUpperBound(0);
-        int cMax = data.GetUpperBound(1);
+        int rMax = maze.GetUpperBound(0);
+        int cMax = maze.GetUpperBound(1);
 
         Queue<Vector2Int> frontier = new Queue<Vector2Int>();
         frontier.Enqueue(new Vector2Int(1, 1));
@@ -372,7 +394,7 @@ public class MazeConstructor : MonoBehaviour
                 int nj = cell.y + dir.y;
 
                 if(ni < 0 || ni > rMax || nj < 0 || nj > cMax) continue;
-                if(visited[ni, nj] || data[ni, nj] == 1) continue;
+                if(visited[ni, nj] || maze[ni, nj] == 1) continue;
 
                 visited[ni, nj] = true;
                 frontier.Enqueue(new Vector2Int(ni, nj));
