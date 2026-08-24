@@ -333,14 +333,14 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// Shoots a raycast at each possible "square" of the maze and collects the positions which are
-    /// both open floor and actually reachable from the start cell, so a goal never spawns in a
-    /// pocket that the random wall placement sealed off.
+    /// Walks each possible "square" of the maze and collects the positions which are reachable
+    /// from the start cell, reading straight from that environment's own maze data instead of
+    /// raycasting against the rendered mesh.
     /// </summary>
-    /// <param name="raycastOrigin"></param>
+    /// <param name="origin"></param>
     /// <param name="environment"></param>
     /// <returns></returns>
-    private List<Vector3> CollectPossibleGoalLocations(Vector3 raycastOrigin, int environment)
+    private List<Vector3> CollectPossibleGoalLocations(Vector3 origin, int environment)
     {
         int sizeCols = GetComponent<GameController>().sizeCols;
         int sizeRows = GetComponent<GameController>().sizeRows;
@@ -348,24 +348,19 @@ public class MazeConstructor : MonoBehaviour
         bool[,] reachable = GetReachableCells(environmentMazeData[environment], sizeRows, sizeCols);
 
         List<Vector3> goalLocations = new List<Vector3>();
-        RaycastHit hit;
 
-        raycastOrigin.y += 5;
         for(int i = 1; i <= sizeRows; i++)
         {
-            raycastOrigin.z += width;
+            origin.z += width;
             for(int j = 1; j <= sizeCols; j++)
             {
-                raycastOrigin.x += width;
-                if(reachable[i, j] && Physics.Raycast(raycastOrigin, Vector3.down, out hit, 6))
+                origin.x += width;
+                if(reachable[i, j])
                 {
-                    if(hit.transform.tag == "Wall")
-                    {
-                        goalLocations.Add(new Vector3(raycastOrigin.x, 1.5f, raycastOrigin.z));
-                    }
+                    goalLocations.Add(new Vector3(origin.x, 1.5f, origin.z));
                 }
             }
-            raycastOrigin.x -= width*sizeCols;
+            origin.x -= width*sizeCols;
         }
 
         return goalLocations;
