@@ -342,10 +342,15 @@ public class MazeConstructor : MonoBehaviour
     /// <returns></returns>
     private List<Vector3> CollectPossibleGoalLocations(Vector3 origin, int environment)
     {
-        int sizeCols = GetComponent<GameController>().sizeCols;
-        int sizeRows = GetComponent<GameController>().sizeRows;
+        // Read the size straight off this environment's own maze array rather than
+        // GameController's current sizeRows/sizeCols - those are shared, global curriculum
+        // values that can advance ahead of this specific environment's next regeneration,
+        // which previously let this loop search past the edge of the maze actually on screen.
+        int[,] maze = environmentMazeData[environment];
+        int sizeRows = maze.GetUpperBound(0);
+        int sizeCols = maze.GetUpperBound(1);
 
-        bool[,] reachable = GetReachableCells(environmentMazeData[environment], sizeRows, sizeCols);
+        bool[,] reachable = GetReachableCells(maze, sizeRows, sizeCols);
 
         List<Vector3> goalLocations = new List<Vector3>();
 
