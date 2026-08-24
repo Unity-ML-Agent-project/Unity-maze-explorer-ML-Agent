@@ -27,8 +27,6 @@ public class MazeConstructor : MonoBehaviour
     // recently regenerated its maze.
     private int[][,] environmentMazeData;
 
-    private int cols, rows;
-
     public int[,] data
     {
         get; private set;
@@ -69,9 +67,6 @@ public class MazeConstructor : MonoBehaviour
             Debug.LogError("Odd numbers work better for dungeon size.");
         }
 
-        rows = sizeRows;
-        cols = sizeCols;
-
         foreach(Transform envi in environments)
         {
             DisposeSingleOldMaze(envi.GetSiblingIndex());
@@ -101,9 +96,6 @@ public class MazeConstructor : MonoBehaviour
             Debug.LogError("Odd numbers work better for dungeon size.");
         }
 
-        rows = sizeRows;
-        cols = sizeCols;
-
         DisposeSingleOldMaze(environment);
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
@@ -128,9 +120,6 @@ public class MazeConstructor : MonoBehaviour
         }
 
         DisposeAllOldMazes();
-
-        rows = sizeRows;
-        cols = sizeCols;
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
         // Examination mode copies one maze layout into every environment, so they
@@ -313,27 +302,37 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// If randomizeGoals is true returns a randomised position for the goal else returns the top right position of the maze
+    /// If randomizeGoals is true returns a randomised position for the goal else returns the top
+    /// right position of the maze - both computed from this specific environment's own maze data,
+    /// never the shared `rows`/`cols` fields (which belong to whichever environment most recently
+    /// regenerated, not necessarily this one).
     /// </summary>
     /// <param name="environment"></param>
     /// <returns></returns>
     public Vector3 RandomizeGoalPlacement(Transform environment)
     {
+        int env = environment.GetSiblingIndex();
+
         if(randomizeGoals)
         {
-            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.GetSiblingIndex());
+            List<Vector3> goalLocations = CollectPossibleGoalLocations(env);
             // If nothing reachable turned up (a heavily walled-off maze), fall back to the
             // start cell itself - guaranteed open and reachable, unlike the fixed corner
             // used below, which isn't reachability-checked at all.
             if(goalLocations.Count == 0)
             {
-                Debug.LogWarning($"No reachable goal candidates for environment {environment.GetSiblingIndex()}; falling back to start cell.");
+                Debug.LogWarning($"No reachable goal candidates for environment {env}; falling back to start cell.");
                 return new Vector3(width, 1.5f, width);
             }
             return goalLocations[Random.Range(0, goalLocations.Count)];
         }
-        else return new Vector3(width*rows, 1.5f, width*(cols-4));
-
+        else
+        {
+            int[,] maze = environmentMazeData[env];
+            int lastValidRow = maze.GetUpperBound(0) - 1;
+            int lastValidCol = maze.GetUpperBound(1) - 1;
+            return new Vector3(width * lastValidCol, 1.5f, width * lastValidRow);
+        }
     }
 
     /// <summary>
