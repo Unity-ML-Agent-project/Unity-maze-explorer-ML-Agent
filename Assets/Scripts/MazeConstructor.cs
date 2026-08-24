@@ -318,7 +318,14 @@ public class MazeConstructor : MonoBehaviour
         if(randomizeGoals)
         {
             List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position, environment.GetSiblingIndex());
-            if(goalLocations.Count == 0) return new Vector3(width*rows, 1.5f, width*(cols-4));
+            // If nothing reachable turned up (a heavily walled-off maze), fall back to the
+            // start cell itself - guaranteed open and reachable, unlike the fixed corner
+            // used below, which isn't reachability-checked at all.
+            if(goalLocations.Count == 0)
+            {
+                Debug.LogWarning($"No reachable goal candidates for environment {environment.GetSiblingIndex()}; falling back to start cell.");
+                return new Vector3(width, 1.5f, width);
+            }
             return goalLocations[Random.Range(0, goalLocations.Count)];
         }
         else return new Vector3(width*rows, 1.5f, width*(cols-4));
