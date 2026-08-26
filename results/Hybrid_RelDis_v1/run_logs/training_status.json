@@ -1,0 +1,47 @@
+{
+    "MazeAgent": {
+        "checkpoints": [
+            {
+                "steps": 499990,
+                "file_path": "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-499990.onnx",
+                "reward": 0.0,
+                "creation_time": 1787626982.599778,
+                "auxillary_file_paths": [
+                    "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-499990.pt"
+                ]
+            },
+            {
+                "steps": 999990,
+                "file_path": "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-999990.onnx",
+                "reward": 0.0,
+                "creation_time": 1787628195.155012,
+                "auxillary_file_paths": [
+                    "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-999990.pt"
+                ]
+            },
+            {
+                "steps": 1200054,
+                "file_path": "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-1200054.onnx",
+                "reward": 0.0,
+                "creation_time": 1787628483.4700024,
+                "auxillary_file_paths": [
+                    "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-1200054.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1200054,
+            "file_path": "results\\Hybrid_RelDis_v1\\MazeAgent.onnx",
+            "reward": 0.0,
+            "creation_time": 1787628483.4700024,
+            "auxillary_file_paths": [
+                "results\\Hybrid_RelDis_v1\\MazeAgent\\MazeAgent-1200054.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.5.1+cu121"
+    }
+}

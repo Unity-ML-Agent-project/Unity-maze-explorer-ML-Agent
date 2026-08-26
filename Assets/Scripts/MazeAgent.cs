@@ -93,32 +93,47 @@ public class MazeAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        base.CollectObservations(sensor); // 收集剩餘步數等基底觀察值
+        base.CollectObservations(sensor); // 先呼叫基底類別的函數，確保原本的觀察值也被收集到
 
         if(useVectorObs)
         {
-            // 原版 Vector 邏輯
+            // 【對照組：100% 原作者邏輯】
+            // 加入自定義的射線偵測數值 (1維)
             sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
+            // 加入未正規化的自身絕對座標 (3維)
             sensor.AddObservation(this.transform.localPosition);
         }
         else if(useHybridObs)
         {
-            // 【進階消融實驗版：Raycast + 正規化絕對座標 + 時間】
-
-            // 1. 加入原版的射線偵測數值 (四周牆壁 BitMask) -> 佔用 1 維
+            // 【實驗組：我們的優化版 Hybrid】
+            // 1. 同樣加入射線偵測數值，保持基準變因一致 (1維)
             sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
-            
-            // 2. 抓取動態地圖邊界 (為了把座標壓縮到 -1.0 ~ 1.0)
-            GameController gc = transform.GetComponentInParent<GameController>();
-            // 注意：這裡的 3.75f 是假設你迷宮一個單元的寬度，請確認這是否符合你的環境尺寸
-            float maxMazeWidth = gc.sizeCols * 3.75f; 
-            float maxMazeHeight = gc.sizeRows * 3.75f;
 
-            // 3. 傳入「正規化後」的 X 與 Z 絕對座標 -> 佔用 2 維
-            sensor.AddObservation(this.transform.localPosition.x / maxMazeWidth);
-            sensor.AddObservation(this.transform.localPosition.z / maxMazeHeight);
+            // 2. 鎖定當下目標
+            Transform currentGoal = (hitGoal != null) ? hitGoal : (goals.Count > 0 ? goals[0] : null);
 
-            // 4. 傳入時間維度特徵 -> 佔用 1 維
+            if (currentGoal != null)
+            {
+                // 3. 計算相對向量 (GPS)
+                Vector3 relativePos = currentGoal.localPosition - this.transform.localPosition;
+
+                // 4. 動態正規化
+                GameController gc = transform.GetComponentInParent<GameController>();
+                float maxMazeWidth = gc.sizeCols * 3.75f; 
+                float maxMazeHeight = gc.sizeRows * 3.75f;
+
+                // 5. 傳入正規化後的相對座標 (2維)
+                sensor.AddObservation(relativePos.x / maxMazeWidth);
+                sensor.AddObservation(relativePos.z / maxMazeHeight);
+            }
+            else
+            {
+                // 防呆機制：維持維度一致
+                sensor.AddObservation(0f);
+                sensor.AddObservation(0f);
+            }
+
+            // 6. 傳入時間維度特徵 (1維)
             sensor.AddObservation((float)stepsUntilZero / MaxStep);
         }
     }
