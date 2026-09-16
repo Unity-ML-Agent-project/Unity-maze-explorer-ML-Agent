@@ -31,7 +31,6 @@ public class MazeAgent : Agent
             mazesTillChange = 0;
             SendMessageUpwards("CreateNewMaze", transform.parent.GetSiblingIndex());
         }
-
         stepsUntilZero = MaxStep;
         GameController gc = transform.GetComponentInParent<GameController>();
         width = gc.sizeCols;
