@@ -1,0 +1,50 @@
+{
+    "MazeSize": {
+        "lesson_num": 3
+    },
+    "MazeAgent": {
+        "checkpoints": [
+            {
+                "steps": 499952,
+                "file_path": "results\\VectorCL39\\MazeAgent\\MazeAgent-499952.onnx",
+                "reward": 0.0,
+                "creation_time": 1648845016.6505318,
+                "auxillary_file_paths": [
+                    "results\\VectorCL39\\MazeAgent\\MazeAgent-499952.pt"
+                ]
+            },
+            {
+                "steps": 999960,
+                "file_path": "results\\VectorCL39\\MazeAgent\\MazeAgent-999960.onnx",
+                "reward": 0.0,
+                "creation_time": 1648846136.9020534,
+                "auxillary_file_paths": [
+                    "results\\VectorCL39\\MazeAgent\\MazeAgent-999960.pt"
+                ]
+            },
+            {
+                "steps": 1200017,
+                "file_path": "results\\VectorCL39\\MazeAgent\\MazeAgent-1200017.onnx",
+                "reward": 0.0,
+                "creation_time": 1648846584.138705,
+                "auxillary_file_paths": [
+                    "results\\VectorCL39\\MazeAgent\\MazeAgent-1200017.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1200017,
+            "file_path": "results\\VectorCL39\\MazeAgent.onnx",
+            "reward": 0.0,
+            "creation_time": 1648846584.138705,
+            "auxillary_file_paths": [
+                "results\\VectorCL39\\MazeAgent\\MazeAgent-1200017.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.27.0",
+        "torch_version": "1.8.0"
+    }
+}

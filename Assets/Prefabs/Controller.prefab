@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &754480002048496839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3998932165528186862}
+  - component: {fileID: 5664957045458323411}
+  - component: {fileID: 7327144381098553914}
+  m_Layer: 0
+  m_Name: Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3998932165528186862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754480002048496839}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5664957045458323411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754480002048496839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a63e2f1fae36d24fa06bf3dd4fe7481, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomizeGoals: 0
+  showDebug: 0
+  mazeMat1: {fileID: 2100000, guid: 3a4fba7028737cd4b86ca488dc2341b4, type: 2}
+  mazeMat2: {fileID: 2100000, guid: 8dfdd06ec52dbb941ae6bdb67a7615d7, type: 2}
+  startMat: {fileID: 2100000, guid: bab3a2074dcbd914e82ac7d042f7f537, type: 2}
+  treasureMat: {fileID: 2100000, guid: 7f441bb4782afe94888bcc45a3017b11, type: 2}
+  environments: []
+  goalCount: 1
+  width: 3.75
+  height: 3.5
+--- !u!114 &7327144381098553914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754480002048496839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e29b084a65d370498da1e426717a876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_sizeRows: 13
+  m_sizeCols: 15

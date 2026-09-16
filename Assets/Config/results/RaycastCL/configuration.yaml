@@ -1,0 +1,115 @@
+default_settings: null
+behaviors:
+  MazeAgent:
+    trainer_type: ppo
+    hyperparameters:
+      batch_size: 100
+      buffer_size: 1000
+      learning_rate: 1.0e-05
+      beta: 0.05
+      epsilon: 0.1
+      lambd: 0.95
+      num_epoch: 2
+      learning_rate_schedule: linear
+    network_settings:
+      normalize: false
+      hidden_units: 128
+      num_layers: 2
+      vis_encode_type: simple
+      memory: null
+      goal_conditioning_type: hyper
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+        network_settings:
+          normalize: false
+          hidden_units: 128
+          num_layers: 2
+          vis_encode_type: simple
+          memory: null
+          goal_conditioning_type: hyper
+    init_path: null
+    keep_checkpoints: 5
+    checkpoint_interval: 500000
+    max_steps: 1200000
+    time_horizon: 64
+    summary_freq: 10000
+    threaded: false
+    self_play: null
+    behavioral_cloning: null
+env_settings:
+  env_path: null
+  env_args: null
+  base_port: 5005
+  num_envs: 1
+  seed: -1
+engine_settings:
+  width: 84
+  height: 84
+  quality_level: 5
+  time_scale: 20
+  target_frame_rate: -1
+  capture_frame_rate: 60
+  no_graphics: false
+environment_parameters:
+  MazeSize:
+    curriculum:
+    - value:
+        sampler_type: constant
+        sampler_parameters:
+          seed: 7384
+          value: 7
+      name: 7X9
+      completion_criteria:
+        behavior: MazeAgent
+        measure: reward
+        min_lesson_length: 100
+        signal_smoothing: true
+        threshold: 0.2
+        require_reset: false
+    - value:
+        sampler_type: constant
+        sampler_parameters:
+          seed: 7385
+          value: 11
+      name: 11X13
+      completion_criteria:
+        behavior: MazeAgent
+        measure: reward
+        min_lesson_length: 100
+        signal_smoothing: true
+        threshold: 0.3
+        require_reset: false
+    - value:
+        sampler_type: constant
+        sampler_parameters:
+          seed: 7386
+          value: 15
+      name: 15X17
+      completion_criteria:
+        behavior: MazeAgent
+        measure: reward
+        min_lesson_length: 100
+        signal_smoothing: true
+        threshold: 0.4
+        require_reset: false
+    - value:
+        sampler_type: constant
+        sampler_parameters:
+          seed: 7387
+          value: 19
+      name: 19X21
+      completion_criteria: null
+checkpoint_settings:
+  run_id: RaycastCL24
+  initialize_from: null
+  load_model: false
+  resume: false
+  force: true
+  train_model: false
+  inference: false
+  results_dir: results
+torch_settings:
+  device: null
+debug: false

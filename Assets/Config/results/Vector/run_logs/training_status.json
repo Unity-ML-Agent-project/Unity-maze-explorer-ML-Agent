@@ -1,0 +1,47 @@
+{
+    "MazeAgent": {
+        "checkpoints": [
+            {
+                "steps": 499970,
+                "file_path": "results\\Vector12\\MazeAgent\\MazeAgent-499970.onnx",
+                "reward": null,
+                "creation_time": 1647552828.73361,
+                "auxillary_file_paths": [
+                    "results\\Vector12\\MazeAgent\\MazeAgent-499970.pt"
+                ]
+            },
+            {
+                "steps": 999970,
+                "file_path": "results\\Vector12\\MazeAgent\\MazeAgent-999970.onnx",
+                "reward": 0.5460000038146973,
+                "creation_time": 1647553956.51802,
+                "auxillary_file_paths": [
+                    "results\\Vector12\\MazeAgent\\MazeAgent-999970.pt"
+                ]
+            },
+            {
+                "steps": 1200036,
+                "file_path": "results\\Vector12\\MazeAgent\\MazeAgent-1200036.onnx",
+                "reward": 0.0,
+                "creation_time": 1647554407.7188756,
+                "auxillary_file_paths": [
+                    "results\\Vector12\\MazeAgent\\MazeAgent-1200036.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1200036,
+            "file_path": "results\\Vector12\\MazeAgent.onnx",
+            "reward": 0.0,
+            "creation_time": 1647554407.7188756,
+            "auxillary_file_paths": [
+                "results\\Vector12\\MazeAgent\\MazeAgent-1200036.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.27.0",
+        "torch_version": "1.8.0"
+    }
+}
