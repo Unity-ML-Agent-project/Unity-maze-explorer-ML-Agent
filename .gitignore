@@ -61,3 +61,6 @@ Thumbs.db.meta
 
 # VS Code
 *.vscode
+# Local sensor checks and results downloaded from the lab server
+/obs_check*/
+/results_server/

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Unity.MLAgents.Sensors;
 
 public class MazeConstructor : MonoBehaviour
 {
@@ -18,7 +19,8 @@ public class MazeConstructor : MonoBehaviour
     private MazeDataGenerator dataGenerator;
     private MazeMeshGenerator meshGenerator;
     private Transform[] environments;
-    
+    private bool addGridWallColliders;
+
     private int cols, rows;
 
     public int[,] data
@@ -45,6 +47,9 @@ public class MazeConstructor : MonoBehaviour
         }
 
         if(!randomizeGoals) goalCount = 1;
+
+        // Only scenes with GridSensor agents need the extra wall colliders
+        addGridWallColliders = GetComponentInChildren<GridSensorComponent>(true) != null;
     }
     
     /// <summary>
@@ -160,6 +165,8 @@ public class MazeConstructor : MonoBehaviour
 
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
         mr.materials = new Material[2] {mazeMat1, mazeMat2};
+
+        AddGridWallColliders(go);
     }
 
     /// <summary>
@@ -189,10 +196,44 @@ public class MazeConstructor : MonoBehaviour
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
         mr.materials = new Material[2] {mazeMat1, mazeMat2};
 
+        AddGridWallColliders(go);
+
         for(int i = 1; i < environments.Length; i++)
         {
             Instantiate(go, environments[i].position, Quaternion.identity).transform.SetParent(environments[i]);
             environments[i].GetChild(0).localPosition = new Vector3(x, y, z);
+        }
+    }
+
+    /// <summary>
+    /// The maze mesh is hollow (walls are thin quads on cell borders), so a GridSensor cell
+    /// touches a wall quad whether it is a wall or a corridor. This adds a solid box inside
+    /// every wall cell (90% of the cell, so neighbouring corridor cells don't touch it).
+    /// Uses the Ignore Raycast layer so default raycasts (goal placement, vector observations)
+    /// are unaffected, and has no renderer so cameras can't see it.
+    /// </summary>
+    /// <param name="maze"></param>
+    private void AddGridWallColliders(GameObject maze)
+    {
+        if(!addGridWallColliders) return;
+
+        GameObject holder = new GameObject("Grid Wall Colliders");
+        holder.transform.SetParent(maze.transform, false);
+        holder.tag = "Wall";
+        holder.layer = 2;
+
+        int rMax = data.GetUpperBound(0);
+        int cMax = data.GetUpperBound(1);
+        for(int i = 0; i <= rMax; i++)
+        {
+            for(int j = 0; j <= cMax; j++)
+            {
+                if(data[i, j] != 1) continue;
+
+                BoxCollider bc = holder.AddComponent<BoxCollider>();
+                bc.center = new Vector3(j * width, height / 2f, i * width);
+                bc.size = new Vector3(width * 0.9f, height, width * 0.9f);
+            }
         }
     }
 

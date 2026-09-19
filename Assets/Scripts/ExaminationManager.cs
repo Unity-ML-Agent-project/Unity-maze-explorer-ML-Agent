@@ -46,7 +46,9 @@ public class ExaminationManager : MonoBehaviour
 
     void FixedUpdate()
     {
+#if UNITY_EDITOR
         if(runIndex >= evaluationMaxRunCount-1) UnityEditor.EditorApplication.isPlaying = false;
+#endif
 
         time += Time.fixedDeltaTime;
         timeText.text = ((int)time).ToString();

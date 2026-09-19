@@ -2,8 +2,8 @@ behaviors:
   MazeAgent:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 256
-      buffer_size: 2048
+      batch_size: 100
+      buffer_size: 1000
       learning_rate: 1.0e-5
       beta: 5.0e-2
       epsilon: 0.1
@@ -14,7 +14,6 @@ behaviors:
       normalize: false
       hidden_units: 128
       num_layers: 2
-      vis_encode_type: simple
     reward_signals:
       extrinsic:
         gamma: 0.99

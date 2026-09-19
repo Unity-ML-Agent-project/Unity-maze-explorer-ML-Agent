@@ -191,14 +191,14 @@ MonoBehaviour:
   m_SensorName: GridSensor
   m_CellScale: {x: 3.75, y: 0.1, z: 3.75}
   m_GridSize: {x: 21, y: 1, z: 21}
-  m_RotateWithAgent: 1
+  m_RotateWithAgent: 0
   m_AgentGameObject: {fileID: 0}
   m_DetectableTags:
   - Wall
   - Goal
   m_ColliderMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 260
   m_MaxColliderBufferSize: 500
   m_InitialColliderBufferSize: 4
   m_DebugColors:
