@@ -64,3 +64,5 @@ Thumbs.db.meta
 # Local sensor checks and results downloaded from the lab server
 /obs_check*/
 /results_server/
+/_trash_*/
+/Tools/__pycache__/
