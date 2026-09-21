@@ -40,7 +40,7 @@ SENSORS = [
     ("Hybrid AbsDis", "#e87ba4", r"Hybrid_AbsDis_v\d+", r"Hybrid_AbsDis_Curriculum_v\d+", "Hybrid_AbsDis", "Hybrid_AbsDis_Curriculum"),
     ("Hybrid RelDis", "#008300", r"Hybrid_RelDis_v\d+", r"Hybrid_RelDis_Curriculum_v\d+", "Hybrid_RelDis", "Hybrid_RelDis_Curriculum"),
 ]
-EXPECTED_RUNS = 5
+MIN_RUNS = 5           # warn below this; group sizes may differ between sensors
 FINAL_WINDOW = 100_000   # "final" = mean over the last 100k steps
 SUCCESS_SPAN = 200_000   # paper: reward above zero for over 200k steps before the end of training
 
@@ -157,8 +157,12 @@ def main():
     for label, colour, cl, folder, members in groups:
         if not members:
             continue
-        if len(members) != EXPECTED_RUNS:
-            warnings.append(f"{folder}：有 {len(members)} 次訓練（預期 {EXPECTED_RUNS} 次）")
+        if len(members) < MIN_RUNS:
+            warnings.append(f"{folder}：只有 {len(members)} 次訓練，樣本數偏少")
+        other = next((g for g in groups if g[0] == label and g[2] != cl and g[4]), None)
+        if other and len(other[4]) != len(members):
+            warnings.append(f"{label}：有無課程學習的訓練次數不同（{len(members)} vs {len(other[4])}），"
+                            "比較兩者時請留意樣本數差異")
         stats = []
         for r in members:
             st = run_stats(reward_runs[r], runs["Entropy"].get(r), runs["Episode Length"].get(r))
