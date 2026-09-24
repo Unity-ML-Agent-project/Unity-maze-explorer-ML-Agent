@@ -10,6 +10,22 @@ public class MazeDataGenerator
         placementThreshold = .1f;                               // 1
     }
 
+    /// <summary>
+    /// Deterministic variant of <see cref="FromDimensions(int, int)"/>: generates the same
+    /// layout every time for a given seed, by swapping in a seeded RNG state for the duration
+    /// of the call and restoring whatever state Unity's global Random was in beforehand (so
+    /// this doesn't perturb any other system's random stream, e.g. concurrent training
+    /// environments or agent exploration noise).
+    /// </summary>
+    public int[,] FromDimensions(int sizeRows, int sizeCols, int seed)
+    {
+        Random.State savedState = Random.state;
+        Random.InitState(seed);
+        int[,] maze = FromDimensions(sizeRows, sizeCols);
+        Random.state = savedState;
+        return maze;
+    }
+
     public int[,] FromDimensions(int sizeRows, int sizeCols)    // 2
     {
         int[,] maze = new int[sizeRows, sizeCols];

@@ -34,8 +34,12 @@ public class ExaminationManager : MonoBehaviour
     [SerializeField]
     private Text timeText;
 
+    private GameController gameController;
+
     void Start()
     {
+        gameController = FindObjectOfType<GameController>();
+
         GameObject canvas = GameObject.Find("Canvas");
 
         scoreTexts = canvas.transform.GetComponentsInChildren<Text>();
@@ -133,7 +137,7 @@ public class ExaminationManager : MonoBehaviour
     /// </summary>
     private void WriteFinishedRunsToFile()
     {
-        string fileName = "ExaminationTimes.csv";
+        string fileName = GetFileName();
         StreamWriter sw;
         if(File.Exists(fileName))
         {
@@ -152,6 +156,27 @@ public class ExaminationManager : MonoBehaviour
         }
 
         sw.Close();
+    }
+
+    /// <summary>
+    /// Names the output file after the GameController's maze seed mode, so a Seen-maze
+    /// evaluation pass and an Unseen-maze pass land in separate files instead of one appending
+    /// onto (and being indistinguishable from) the other. Falls back to the original
+    /// unsuffixed name when no GameController is found or it's in the default Random mode.
+    /// </summary>
+    private string GetFileName()
+    {
+        if(gameController == null) return "ExaminationTimes.csv";
+
+        switch(gameController.SeedMode)
+        {
+            case GameController.MazeSeedMode.Seen:
+                return "ExaminationTimes_Seen.csv";
+            case GameController.MazeSeedMode.Unseen:
+                return "ExaminationTimes_Unseen.csv";
+            default:
+                return "ExaminationTimes.csv";
+        }
     }
 
     /// <summary>

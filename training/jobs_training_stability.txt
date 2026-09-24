@@ -1,0 +1,13 @@
+# Training Stability (Item 3): non-curriculum, Vector + Raycast, 5 fixed seeds each.
+# Format: name  config  executable  [extra args]   (consumed by ~/tools/run_queue.sh on the server)
+# The seed list is fixed and shared by both sensors: 42 123 456 789 1024. Do not change it.
+vector_seed42       config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=42 --no-graphics
+vector_seed123      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=123 --no-graphics
+vector_seed456      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=456 --no-graphics
+vector_seed789      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=789 --no-graphics
+vector_seed1024     config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=1024 --no-graphics
+raycast_seed42      config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=42 --no-graphics
+raycast_seed123     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=123 --no-graphics
+raycast_seed456     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=456 --no-graphics
+raycast_seed789     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=789 --no-graphics
+raycast_seed1024    config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=1024 --no-graphics

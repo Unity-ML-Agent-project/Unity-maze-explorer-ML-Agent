@@ -56,11 +56,17 @@ public class MazeConstructor : MonoBehaviour
     }
     
     /// <summary>
-    /// Generates a new maze of the given size into each of the environemnts in the scene
+    /// Generates a new maze of the given size into each of the environemnts in the scene.
+    /// Pass <paramref name="seedProvider"/> to make generation deterministic - it is invoked
+    /// once per environment so each one still gets its own layout (rather than every
+    /// environment cloning the same maze off a single shared seed). Used to draw mazes from a
+    /// fixed "seen" pool for generalization-gap training/evaluation; leave null for the
+    /// original unrestricted-random behaviour.
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
-    public void GenerateAllMazes(int sizeRows, int sizeCols)
+    /// <param name="seedProvider"></param>
+    public void GenerateAllMazes(int sizeRows, int sizeCols, System.Func<int> seedProvider = null)
     {
         if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
         {
@@ -71,7 +77,9 @@ public class MazeConstructor : MonoBehaviour
         {
             DisposeSingleOldMaze(envi.GetSiblingIndex());
 
-            data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+            data = seedProvider != null
+                ? dataGenerator.FromDimensions(sizeRows, sizeCols, seedProvider())
+                : dataGenerator.FromDimensions(sizeRows, sizeCols);
             environmentMazeData[envi.GetSiblingIndex()] = data;
 
             DisplaySingleMaze(envi.GetSiblingIndex());
@@ -87,7 +95,9 @@ public class MazeConstructor : MonoBehaviour
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
     /// <param name="environment"></param>
-    public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment)
+    /// <param name="seed">When given, generates deterministically from this seed instead of
+    /// unrestricted randomness - used to draw from the "seen" pool during curriculum training.</param>
+    public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment, int? seed = null)
     {
         if(environment >= environments.Length || environment < 0) return;
 
@@ -98,7 +108,9 @@ public class MazeConstructor : MonoBehaviour
 
         DisposeSingleOldMaze(environment);
 
-        data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        data = seed.HasValue
+            ? dataGenerator.FromDimensions(sizeRows, sizeCols, seed.Value)
+            : dataGenerator.FromDimensions(sizeRows, sizeCols);
         environmentMazeData[environment] = data;
 
         DisplaySingleMaze(environment);
@@ -112,7 +124,10 @@ public class MazeConstructor : MonoBehaviour
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
-    public void GenerateExaminationMazes(int sizeRows, int sizeCols)
+    /// <param name="seed">When given, generates deterministically from this seed - pass a seed
+    /// from the training-time "seen" pool for a Seen-maze evaluation round, or any seed outside
+    /// that pool for an Unseen-maze round.</param>
+    public void GenerateExaminationMazes(int sizeRows, int sizeCols, int? seed = null)
     {
         if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
         {
@@ -121,7 +136,9 @@ public class MazeConstructor : MonoBehaviour
 
         DisposeAllOldMazes();
 
-        data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        data = seed.HasValue
+            ? dataGenerator.FromDimensions(sizeRows, sizeCols, seed.Value)
+            : dataGenerator.FromDimensions(sizeRows, sizeCols);
         // Examination mode copies one maze layout into every environment, so they
         // all genuinely share this same data.
         for(int i = 0; i < environments.Length; i++)
