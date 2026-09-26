@@ -33,6 +33,8 @@ public class MazeAgent : Agent
     {
         hybridMode = (HybridMode)(int)Academy.Instance.EnvironmentParameters.GetWithDefault(
             "HybridMode", (float)(int)hybridMode);
+        // Shows up as "Agent/HybridMode" in TensorBoard (0 = absolute, 1 = relative): proves which variant really ran.
+        Academy.Instance.StatsRecorder.Add("Agent/HybridMode", (float)(int)hybridMode);
 
         mazesTillChange++;
         if(mazesTillChange >= mazeCountToChange && !evaluationMode)
