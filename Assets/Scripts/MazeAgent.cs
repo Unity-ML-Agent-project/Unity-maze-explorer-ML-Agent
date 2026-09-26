@@ -10,6 +10,12 @@ public class MazeAgent : Agent
     [SerializeField, Tooltip("Remember to set vector observations to 0")]
     private bool useVectorObs;
     [SerializeField]
+    private bool useHybridObs;
+    public enum HybridMode { Absolute = 0, Relative = 1 }
+    [SerializeField, Tooltip("Absolute: normalised position in the maze. Relative: normalised offset to the goal. "
+        + "The HybridMode environment parameter (0/1) from the yaml overrides this.")]
+    private HybridMode hybridMode = HybridMode.Absolute;
+    [SerializeField]
     private float step = 3.75f;
     [SerializeField]
     private int mazeCountToChange = 5;
@@ -25,6 +31,9 @@ public class MazeAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        hybridMode = (HybridMode)(int)Academy.Instance.EnvironmentParameters.GetWithDefault(
+            "HybridMode", (float)(int)hybridMode);
+
         mazesTillChange++;
         if(mazesTillChange >= mazeCountToChange && !evaluationMode)
         {
@@ -91,12 +100,48 @@ public class MazeAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        base.CollectObservations(sensor);
+        base.CollectObservations(sensor); // 收集剩餘步數等基底觀察值
 
         if(useVectorObs)
         {
+            // 原版 Vector 邏輯
             sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
             sensor.AddObservation(this.transform.localPosition);
+        }
+        else if(useHybridObs)
+        {
+            // Hybrid: wall/goal bitmask (1) + position feature (2) + remaining time (1) = 4 values
+            sensor.AddObservation(DirectionBitMaskCreator.CollectNormalisedDirection(this.transform));
+
+            // Normalise by the maze extent so the position feature stays in about -1..1
+            GameController gc = transform.GetComponentInParent<GameController>();
+            float maxMazeWidth = gc.sizeCols * 3.75f;
+            float maxMazeHeight = gc.sizeRows * 3.75f;
+
+            if(hybridMode == HybridMode.Absolute)
+            {
+                // Hybrid_AbsDis: normalised absolute X/Z position
+                sensor.AddObservation(this.transform.localPosition.x / maxMazeWidth);
+                sensor.AddObservation(this.transform.localPosition.z / maxMazeHeight);
+            }
+            else
+            {
+                // Hybrid_RelDis: normalised offset from the agent to the current goal
+                Transform currentGoal = (hitGoal != null) ? hitGoal : (goals.Count > 0 ? goals[0] : null);
+                if(currentGoal != null)
+                {
+                    Vector3 relativePos = currentGoal.localPosition - this.transform.localPosition;
+                    sensor.AddObservation(relativePos.x / maxMazeWidth);
+                    sensor.AddObservation(relativePos.z / maxMazeHeight);
+                }
+                else
+                {
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                }
+            }
+
+            sensor.AddObservation((float)stepsUntilZero / MaxStep);
         }
     }
 
