@@ -798,12 +798,12 @@ PrefabInstance:
     - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
         type: 3}
       propertyPath: m_sizeCols
-      value: 23
+      value: 21
       objectReference: {fileID: 0}
     - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
         type: 3}
       propertyPath: m_sizeRows
-      value: 21
+      value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
         type: 3}

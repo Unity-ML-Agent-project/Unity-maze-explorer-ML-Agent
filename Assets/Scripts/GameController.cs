@@ -9,28 +9,41 @@ public class GameController : MonoBehaviour
 {
     /// <summary>
     /// Random: unrestricted maze generation (original behaviour).
-    /// Seen: mazes are drawn from a fixed, reused seed pool - the pool a curriculum/training
-    /// run is configured with here.
-    /// Unseen: mazes are drawn from seeds outside that pool, i.e. layouts never trained on.
-    /// Seen/Unseen only matter together: train with Seen, then run the evaluation scene once
-    /// per mode to get comparable Seen-maze vs Unseen-maze success rates for the
-    /// generalization-gap metric.
+    /// Seen: mazes come from a small fixed seed pool. Training draws from it at random; the
+    /// evaluation walks it in a fixed shuffled order that is the same for every model.
+    /// Unseen: seeds outside the pool, i.e. layouts never trained on. Evaluation walks them in
+    /// ascending order so every model is tested on exactly the same mazes.
+    /// The mode can be overridden by the "SeedMode" environment parameter (0/1/2) from the
+    /// training yaml, so one build serves both the Random and the Seen runs.
     /// </summary>
-    public enum MazeSeedMode { Random, Seen, Unseen }
+    public enum MazeSeedMode { Random = 0, Seen = 1, Unseen = 2 }
 
     [SerializeField] private int m_sizeRows = 13, m_sizeCols = 15;
     [SerializeField] private bool examinationMode = false;
 
     [Header("Generalization Gap")]
     [SerializeField] private MazeSeedMode seedMode = MazeSeedMode.Random;
-    // Training seeds: 0-999. Test seeds: 1000-1199 - adjacent to, but never overlapping, the
-    // training range, so "unseen" is guaranteed disjoint from anything the agent trained on.
+    // Seen pool is small on purpose: a run only draws ~500 mazes, so a large pool would leave most
+    // "seen" mazes never actually trained on. Unseen range never overlaps the pool.
     [SerializeField] private int seenPoolBaseSeed = 0;
-    [SerializeField] private int seenPoolSize = 1000;
+    [SerializeField] private int seenPoolSize = 50;
     [SerializeField] private int unseenRangeStart = 1000;
-    [SerializeField] private int unseenRangeSize = 200;
+    [SerializeField] private int unseenRangeSize = 100;
 
-    public MazeSeedMode SeedMode => seedMode;
+    // Fixed so the shuffled Seen evaluation order is identical for every sensor and every run.
+    private const int SeenOrderShuffleSeed = 2024;
+    private int[] seenEvalOrder;
+    private int examRound;
+
+    /// <summary>Seed used for the most recently generated maze (-1 before the first seeded one).</summary>
+    public int LastSeed { get; private set; } = -1;
+
+    /// <summary>Environment parameter "SeedMode" wins over the Inspector value when present.</summary>
+    private MazeSeedMode ActiveSeedMode => env == null
+        ? seedMode
+        : (MazeSeedMode)(int)env.GetWithDefault("SeedMode", (float)(int)seedMode);
+
+    public MazeSeedMode SeedMode => ActiveSeedMode;
 
     public int sizeRows
     { 
@@ -72,20 +85,54 @@ public class GameController : MonoBehaviour
     /// </summary>
     public void StartNewGame()
     {
-        if(!examinationMode) generator.GenerateAllMazes(sizeRows, sizeCols, seedMode == MazeSeedMode.Random ? null : (System.Func<int>)NextSeed);
-        else generator.GenerateExaminationMazes(sizeRows, sizeCols, seedMode == MazeSeedMode.Random ? (int?)null : NextSeed());
+        bool seeded = ActiveSeedMode != MazeSeedMode.Random;
+        if(!examinationMode) generator.GenerateAllMazes(sizeRows, sizeCols, seeded ? (System.Func<int>)NextSeed : null);
+        else generator.GenerateExaminationMazes(sizeRows, sizeCols, seeded ? NextSeed() : (int?)null);
     }
 
     /// <summary>
-    /// Draws the next seed according to <see cref="seedMode"/>: a value from the fixed "seen"
-    /// pool, or a value from a disjoint range that pool never touches ("unseen"). Only meant to
-    /// be called when seedMode isn't Random.
+    /// Picks the seed for the next maze. Only called when the seed mode isn't Random.
+    /// Training: random draw from the Seen pool. Evaluation: the round-th entry of a fixed
+    /// sequence, so every model faces the same mazes in the same order.
     /// </summary>
     private int NextSeed()
     {
-        return seedMode == MazeSeedMode.Seen
-            ? UnityEngine.Random.Range(seenPoolBaseSeed, seenPoolBaseSeed + seenPoolSize)
-            : UnityEngine.Random.Range(unseenRangeStart, unseenRangeStart + unseenRangeSize);
+        int seed;
+        if(examinationMode)
+        {
+            int round = examRound++;
+            seed = ActiveSeedMode == MazeSeedMode.Seen
+                ? SeenEvalOrder()[round % seenPoolSize]
+                : unseenRangeStart + round % unseenRangeSize;
+        }
+        else
+        {
+            seed = ActiveSeedMode == MazeSeedMode.Seen
+                ? UnityEngine.Random.Range(seenPoolBaseSeed, seenPoolBaseSeed + seenPoolSize)
+                : UnityEngine.Random.Range(unseenRangeStart, unseenRangeStart + unseenRangeSize);
+        }
+
+        LastSeed = seed;
+        return seed;
+    }
+
+    /// <summary>The Seen pool in a fixed shuffled order (Fisher-Yates with a constant seed).</summary>
+    private int[] SeenEvalOrder()
+    {
+        if(seenEvalOrder != null && seenEvalOrder.Length == seenPoolSize) return seenEvalOrder;
+
+        seenEvalOrder = new int[seenPoolSize];
+        for(int i = 0; i < seenPoolSize; i++) seenEvalOrder[i] = seenPoolBaseSeed + i;
+
+        System.Random rng = new System.Random(SeenOrderShuffleSeed);
+        for(int i = seenPoolSize - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            int tmp = seenEvalOrder[i];
+            seenEvalOrder[i] = seenEvalOrder[j];
+            seenEvalOrder[j] = tmp;
+        }
+        return seenEvalOrder;
     }
 
     /// <summary>
@@ -105,16 +152,17 @@ public class GameController : MonoBehaviour
     /// <param name="environment"></param>
     public void CreateNewMaze(int environment)
     {
+        bool seeded = ActiveSeedMode != MazeSeedMode.Random;
         if(examinationMode && !goalReached)
         {
             goalReached = true;
-            generator.GenerateExaminationMazes(sizeRows, sizeCols, seedMode == MazeSeedMode.Random ? (int?)null : NextSeed());
+            generator.GenerateExaminationMazes(sizeRows, sizeCols, seeded ? NextSeed() : (int?)null);
         }
         else
         {
             int envParam = (int)env.GetWithDefault("MazeSize", 19);
             ChangeMazeSize(envParam, envParam+2);
-            generator.GenerateSingleMaze(sizeRows, sizeCols, environment, seedMode == MazeSeedMode.Random ? (int?)null : NextSeed());
+            generator.GenerateSingleMaze(sizeRows, sizeCols, environment, seeded ? NextSeed() : (int?)null);
         }
     }
 }

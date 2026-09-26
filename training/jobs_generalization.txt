@@ -1,0 +1,61 @@
+# Generalization Gap (Item 4): trained on the Seen maze pool (seeds 0-49), 5 fixed seeds per condition.
+# Format: name  config  executable  [extra args]   (consumed by ~/tools/run_queue.sh on the server)
+# Upload training/config/*.yaml to ~/maze_<name>/config/. Vector/Raycast executables come from branch chiheo,
+# the Hybrid executable from branch chiheo-hybrid. Delete the lines you do not run (e.g. to split the work).
+# All configs pass SeedMode=1 (Seen pool) through environment_parameters; --seed is the training seed.
+
+# --- vector no curriculum ---
+gen_vector_seed42               config/MazeConfigSeen.yaml                                Vector/MazeVector.x86_64    --seed=42 --no-graphics
+gen_vector_seed123              config/MazeConfigSeen.yaml                                Vector/MazeVector.x86_64    --seed=123 --no-graphics
+gen_vector_seed456              config/MazeConfigSeen.yaml                                Vector/MazeVector.x86_64    --seed=456 --no-graphics
+gen_vector_seed789              config/MazeConfigSeen.yaml                                Vector/MazeVector.x86_64    --seed=789 --no-graphics
+gen_vector_seed1024             config/MazeConfigSeen.yaml                                Vector/MazeVector.x86_64    --seed=1024 --no-graphics
+
+# --- vector curriculum ---
+gen_vector_cl_seed42            config/MazeConfigCurriculumSeen.yaml                      Vector/MazeVector.x86_64    --seed=42 --no-graphics
+gen_vector_cl_seed123           config/MazeConfigCurriculumSeen.yaml                      Vector/MazeVector.x86_64    --seed=123 --no-graphics
+gen_vector_cl_seed456           config/MazeConfigCurriculumSeen.yaml                      Vector/MazeVector.x86_64    --seed=456 --no-graphics
+gen_vector_cl_seed789           config/MazeConfigCurriculumSeen.yaml                      Vector/MazeVector.x86_64    --seed=789 --no-graphics
+gen_vector_cl_seed1024          config/MazeConfigCurriculumSeen.yaml                      Vector/MazeVector.x86_64    --seed=1024 --no-graphics
+
+# --- raycast no curriculum ---
+gen_raycast_seed42              config/MazeConfigSeen.yaml                                Raycast/MazeRaycast.x86_64  --seed=42 --no-graphics
+gen_raycast_seed123             config/MazeConfigSeen.yaml                                Raycast/MazeRaycast.x86_64  --seed=123 --no-graphics
+gen_raycast_seed456             config/MazeConfigSeen.yaml                                Raycast/MazeRaycast.x86_64  --seed=456 --no-graphics
+gen_raycast_seed789             config/MazeConfigSeen.yaml                                Raycast/MazeRaycast.x86_64  --seed=789 --no-graphics
+gen_raycast_seed1024            config/MazeConfigSeen.yaml                                Raycast/MazeRaycast.x86_64  --seed=1024 --no-graphics
+
+# --- raycast curriculum ---
+gen_raycast_cl_seed42           config/MazeConfigCurriculumSeen.yaml                      Raycast/MazeRaycast.x86_64  --seed=42 --no-graphics
+gen_raycast_cl_seed123          config/MazeConfigCurriculumSeen.yaml                      Raycast/MazeRaycast.x86_64  --seed=123 --no-graphics
+gen_raycast_cl_seed456          config/MazeConfigCurriculumSeen.yaml                      Raycast/MazeRaycast.x86_64  --seed=456 --no-graphics
+gen_raycast_cl_seed789          config/MazeConfigCurriculumSeen.yaml                      Raycast/MazeRaycast.x86_64  --seed=789 --no-graphics
+gen_raycast_cl_seed1024         config/MazeConfigCurriculumSeen.yaml                      Raycast/MazeRaycast.x86_64  --seed=1024 --no-graphics
+
+# --- hybridabs no curriculum ---
+gen_hybridabs_seed42            config/MazeConfigSeen_HybridAbs.yaml                      Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+gen_hybridabs_seed123           config/MazeConfigSeen_HybridAbs.yaml                      Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+gen_hybridabs_seed456           config/MazeConfigSeen_HybridAbs.yaml                      Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+gen_hybridabs_seed789           config/MazeConfigSeen_HybridAbs.yaml                      Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+gen_hybridabs_seed1024          config/MazeConfigSeen_HybridAbs.yaml                      Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics
+
+# --- hybridabs curriculum ---
+gen_hybridabs_cl_seed42         config/MazeConfigCurriculumSeen_HybridAbs.yaml            Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+gen_hybridabs_cl_seed123        config/MazeConfigCurriculumSeen_HybridAbs.yaml            Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+gen_hybridabs_cl_seed456        config/MazeConfigCurriculumSeen_HybridAbs.yaml            Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+gen_hybridabs_cl_seed789        config/MazeConfigCurriculumSeen_HybridAbs.yaml            Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+gen_hybridabs_cl_seed1024       config/MazeConfigCurriculumSeen_HybridAbs.yaml            Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics
+
+# --- hybridrel no curriculum ---
+gen_hybridrel_seed42            config/MazeConfigSeen_HybridRel.yaml                      Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+gen_hybridrel_seed123           config/MazeConfigSeen_HybridRel.yaml                      Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+gen_hybridrel_seed456           config/MazeConfigSeen_HybridRel.yaml                      Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+gen_hybridrel_seed789           config/MazeConfigSeen_HybridRel.yaml                      Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+gen_hybridrel_seed1024          config/MazeConfigSeen_HybridRel.yaml                      Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics
+
+# --- hybridrel curriculum ---
+gen_hybridrel_cl_seed42         config/MazeConfigCurriculumSeen_HybridRel.yaml            Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+gen_hybridrel_cl_seed123        config/MazeConfigCurriculumSeen_HybridRel.yaml            Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+gen_hybridrel_cl_seed456        config/MazeConfigCurriculumSeen_HybridRel.yaml            Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+gen_hybridrel_cl_seed789        config/MazeConfigCurriculumSeen_HybridRel.yaml            Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+gen_hybridrel_cl_seed1024       config/MazeConfigCurriculumSeen_HybridRel.yaml            Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics

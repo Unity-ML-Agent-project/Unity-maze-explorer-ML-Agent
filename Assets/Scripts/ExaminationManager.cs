@@ -36,6 +36,12 @@ public class ExaminationManager : MonoBehaviour
 
     private GameController gameController;
 
+    /// <summary>
+    /// In Seen/Unseen mode each row also records the maze seed, so results from different models
+    /// can be checked (and paired) maze by maze. The default Random mode keeps the old columns.
+    /// </summary>
+    private bool IncludeSeed => gameController != null && gameController.SeedMode != GameController.MazeSeedMode.Random;
+
     void Start()
     {
         gameController = FindObjectOfType<GameController>();
@@ -195,6 +201,7 @@ public class ExaminationManager : MonoBehaviour
                 line += ",";
             }
         }
+        if(IncludeSeed) line += "," + gameController.LastSeed;
         sw.WriteLine(line);
         
     }
@@ -235,6 +242,7 @@ public class ExaminationManager : MonoBehaviour
                 line += ",";
             }
         }
+        if(IncludeSeed) line += ",Seed";
         sw.WriteLine(line);
     }
 
