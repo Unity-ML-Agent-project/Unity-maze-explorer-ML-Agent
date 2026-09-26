@@ -25,10 +25,12 @@ public class GameController : MonoBehaviour
     [SerializeField] private MazeSeedMode seedMode = MazeSeedMode.Random;
     // Seen pool is small on purpose: a run only draws ~500 mazes, so a large pool would leave most
     // "seen" mazes never actually trained on. Unseen range never overlaps the pool.
-    [SerializeField] private int seenPoolBaseSeed = 0;
-    [SerializeField] private int seenPoolSize = 50;
-    [SerializeField] private int unseenRangeStart = 1000;
-    [SerializeField] private int unseenRangeSize = 100;
+    // Constants on purpose: as serialized fields Unity kept the stale defaults cached in the imported
+    // prefab, so the first Linux builds silently trained on the old pool (seeds 0-999).
+    private const int seenPoolBaseSeed = 0;
+    private const int seenPoolSize = 50;
+    private const int unseenRangeStart = 1000;
+    private const int unseenRangeSize = 100;
 
     // Fixed so the shuffled Seen evaluation order is identical for every sensor and every run.
     private const int SeenOrderShuffleSeed = 2024;
@@ -113,6 +115,8 @@ public class GameController : MonoBehaviour
         }
 
         LastSeed = seed;
+        // Shows up as "Maze/Seed" in TensorBoard: proves which seed range the mazes really came from.
+        Academy.Instance.StatsRecorder.Add("Maze/Seed", seed);
         return seed;
     }
 
