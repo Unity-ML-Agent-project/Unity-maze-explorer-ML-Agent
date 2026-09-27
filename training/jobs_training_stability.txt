@@ -1,13 +1,39 @@
-# Training Stability (Item 3): non-curriculum, Vector + Raycast, 5 fixed seeds each.
+# Training Stability (Item 3): non-curriculum, Random maze mode (no SeedMode set), 5 fixed seeds
+# shared across every sensor: 42 123 456 789 1024. Do not change the seed list.
 # Format: name  config  executable  [extra args]   (consumed by ~/tools/run_queue.sh on the server)
-# The seed list is fixed and shared by both sensors: 42 123 456 789 1024. Do not change it.
-vector_seed42       config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=42 --no-graphics
-vector_seed123      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=123 --no-graphics
-vector_seed456      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=456 --no-graphics
-vector_seed789      config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=789 --no-graphics
-vector_seed1024     config/MazeConfig.yaml  Vector/MazeVector.x86_64    --seed=1024 --no-graphics
-raycast_seed42      config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=42 --no-graphics
-raycast_seed123     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=123 --no-graphics
-raycast_seed456     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=456 --no-graphics
-raycast_seed789     config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=789 --no-graphics
-raycast_seed1024    config/MazeConfig.yaml  Raycast/MazeRaycast.x86_64  --seed=1024 --no-graphics
+#
+# Grid/Camera/Hybrid-Abs reuse config/MazeConfig.yaml unchanged - GameController defaults to Random
+# maze mode when the yaml sets no SeedMode, and MazeAgent defaults HybridMode to Absolute when unset.
+# Hybrid-Rel needs config/MazeConfig_HybridRel.yaml (same hyperparameters, adds HybridMode: 1.0 only).
+# Camera needs a real display to render for CameraSensor: do not add --no-graphics to its line, and
+# do not let the VM desktop get logged out while it runs.
+vector_seed42       config/MazeConfig.yaml            Vector/MazeVector.x86_64    --seed=42 --no-graphics
+vector_seed123      config/MazeConfig.yaml            Vector/MazeVector.x86_64    --seed=123 --no-graphics
+vector_seed456      config/MazeConfig.yaml            Vector/MazeVector.x86_64    --seed=456 --no-graphics
+vector_seed789      config/MazeConfig.yaml            Vector/MazeVector.x86_64    --seed=789 --no-graphics
+vector_seed1024     config/MazeConfig.yaml            Vector/MazeVector.x86_64    --seed=1024 --no-graphics
+raycast_seed42      config/MazeConfig.yaml            Raycast/MazeRaycast.x86_64  --seed=42 --no-graphics
+raycast_seed123     config/MazeConfig.yaml            Raycast/MazeRaycast.x86_64  --seed=123 --no-graphics
+raycast_seed456     config/MazeConfig.yaml            Raycast/MazeRaycast.x86_64  --seed=456 --no-graphics
+raycast_seed789     config/MazeConfig.yaml            Raycast/MazeRaycast.x86_64  --seed=789 --no-graphics
+raycast_seed1024    config/MazeConfig.yaml            Raycast/MazeRaycast.x86_64  --seed=1024 --no-graphics
+grid_seed42         config/MazeConfig.yaml            Grid/MazeGrid.x86_64        --seed=42 --no-graphics
+grid_seed123        config/MazeConfig.yaml            Grid/MazeGrid.x86_64        --seed=123 --no-graphics
+grid_seed456        config/MazeConfig.yaml            Grid/MazeGrid.x86_64        --seed=456 --no-graphics
+grid_seed789        config/MazeConfig.yaml            Grid/MazeGrid.x86_64        --seed=789 --no-graphics
+grid_seed1024       config/MazeConfig.yaml            Grid/MazeGrid.x86_64        --seed=1024 --no-graphics
+camera_seed42       config/MazeConfig.yaml            Camera/MazeCamera.x86_64    --seed=42
+camera_seed123      config/MazeConfig.yaml            Camera/MazeCamera.x86_64    --seed=123
+camera_seed456      config/MazeConfig.yaml            Camera/MazeCamera.x86_64    --seed=456
+camera_seed789      config/MazeConfig.yaml            Camera/MazeCamera.x86_64    --seed=789
+camera_seed1024     config/MazeConfig.yaml            Camera/MazeCamera.x86_64    --seed=1024
+hybridabs_seed42    config/MazeConfig.yaml            Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+hybridabs_seed123   config/MazeConfig.yaml            Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+hybridabs_seed456   config/MazeConfig.yaml            Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+hybridabs_seed789   config/MazeConfig.yaml            Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+hybridabs_seed1024  config/MazeConfig.yaml            Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics
+hybridrel_seed42    config/MazeConfig_HybridRel.yaml  Hybrid/MazeHybrid.x86_64    --seed=42 --no-graphics
+hybridrel_seed123   config/MazeConfig_HybridRel.yaml  Hybrid/MazeHybrid.x86_64    --seed=123 --no-graphics
+hybridrel_seed456   config/MazeConfig_HybridRel.yaml  Hybrid/MazeHybrid.x86_64    --seed=456 --no-graphics
+hybridrel_seed789   config/MazeConfig_HybridRel.yaml  Hybrid/MazeHybrid.x86_64    --seed=789 --no-graphics
+hybridrel_seed1024  config/MazeConfig_HybridRel.yaml  Hybrid/MazeHybrid.x86_64    --seed=1024 --no-graphics

@@ -3,10 +3,16 @@
 Goal: retrain the same setup (non-curriculum) with several fixed random seeds and report Mean ± SD of the
 final reward per sensor.
 
-- Sensors: Vector (`MazeRunnerVector` scene), Raycast (`MazeRunnerRaycastSensor` scene)
-- Seeds (same list for both sensors): `42, 123, 456, 789, 1024`
-- Config: `Assets/Config/MazeConfig.yaml` (no curriculum, no seed in the file - the seed is passed as `--seed`)
+- Sensors: Vector, Raycast, Grid, Camera, Hybrid-Abs, Hybrid-Rel (6 conditions)
+- Seeds (same list for every condition): `42, 123, 456, 789, 1024`
+- Config: `config/MazeConfig.yaml` for everything except Hybrid-Rel, which needs `config/MazeConfig_HybridRel.yaml`
+  (identical hyperparameters, adds `HybridMode: 1.0`). Neither file sets `SeedMode`, so `GameController` stays in
+  Random maze mode - this is deliberately not the Item 4 Seen pool.
+- Executables: Vector/Raycast built from branch `chiheo`, Hybrid-Abs/Hybrid-Rel from `chiheo-hybrid` (both share the
+  same `Hybrid/MazeHybrid.x86_64`, distinguished only by which yaml is passed), Grid/Camera from `chiheo-gridcam`.
+  These are the same executables already built for Item 4 - no rebuild needed if you still have them.
 - Job list: [`jobs_training_stability.txt`](jobs_training_stability.txt) - the single source of truth for which runs exist
+- Camera's line has no `--no-graphics` (CameraSensor needs a real render) - keep the VM desktop logged in while it runs.
 
 ## Which runs count
 
@@ -20,11 +26,14 @@ Keep them as a reference only; do not average them with the server runs.
 
 Read the server guide first (3 concurrent trainings for the whole team, never `pkill -f mlagents-learn`).
 
-1. Unity 2022.3.62f3 with Linux Build Support (Mono). Build each scene separately (File > Build Settings > Linux,
-   only that scene ticked, Development Build off) into `Builds/Vector/MazeVector` and `Builds/Raycast/MazeRaycast`.
-   The executable names must match the job list.
-2. Upload to your own folder `~/maze_<name>` (build folders, `Assets/Config/MazeConfig.yaml` -> `config/`, this job list),
-   then `chmod +x` the executables and `cp ~/tools/run_queue.sh ~/maze_<name>/`.
+1. If you already built these for Item 4, reuse them as-is; the seed control is the same code. Otherwise: Unity
+   2022.3.62f3 with Linux Build Support (Mono), one scene ticked at a time, Development Build off. Vector/Raycast from
+   branch `chiheo`, Hybrid (one build, used for both Hybrid-Abs and Hybrid-Rel) from `chiheo-hybrid`, Grid/Camera from
+   `chiheo-gridcam`. Executable names must match the job list (`Vector/MazeVector`, `Raycast/MazeRaycast`,
+   `Grid/MazeGrid`, `Camera/MazeCamera`, `Hybrid/MazeHybrid`).
+2. Upload to your own folder `~/maze_<name>` (build folders, `Assets/Config/MazeConfig.yaml` and
+   `training/config/MazeConfig_HybridRel.yaml` -> `config/`, this job list), then `chmod +x` the executables and
+   `cp ~/tools/run_queue.sh ~/maze_<name>/`.
 3. Check free slots: `pgrep -fa "mlagents-learn" | grep -o -- "--run-id=[^ ]*\|--base-port=[0-9]*" | paste - - | sort -u ; uptime`
 4. Start (background), using your own base port:
    `cd ~/maze_<name> && nohup bash run_queue.sh jobs_training_stability.txt 1 <base_port> > queue.log 2>&1 &`
@@ -43,10 +52,14 @@ To split the work, copy the job list and delete the lines someone else runs.
 
 ## Status (server runs)
 
-| Run | Status |
+| Condition | Status |
 |---|---|
-| vector_seed42 / 123 / 456 / 789 / 1024 | reported complete (chiheo); copy to `results_server/` |
-| raycast_seed42 / 123 / 456 / 789 / 1024 | reported complete (chiheo); copy to `results_server/` |
+| vector_seed42 / 123 / 456 / 789 / 1024 | complete, verified against `results/` in `SeedStability_Results_10` |
+| raycast_seed42 / 123 / 456 / 789 / 1024 | complete, verified against `results/` in `SeedStability_Results_10` |
+| grid_seed{42,123,456,789,1024} | not run yet |
+| camera_seed{42,123,456,789,1024} | not run yet |
+| hybridabs_seed{42,123,456,789,1024} | not run yet |
+| hybridrel_seed{42,123,456,789,1024} | not run yet |
 
 # Generalization Gap (Item 4)
 
@@ -63,8 +76,8 @@ Question: did the agent learn to solve mazes, or only the mazes it trained on?
 | Maze size | 19 x 21 everywhere (training final size = `ExaminationScene` size; a seed only reproduces a maze at the same size) |
 | Success | reaches the goal within 60 s of game time; 100 rounds per Seen / Unseen evaluation |
 | Evaluation | one model at a time (not the shared 4-agent race) |
-| Training | seed `42`, 10 repeats per condition (run-ids `_r1`-`_r10`). The repeats catch failed trainings (reward stuck at 0), so report the training success rate; they differ only by run-to-run nondeterminism, not by seed |
-| Conditions | Vector, Raycast, Hybrid-Abs, Hybrid-Rel, no curriculum = 4 x 10 = 40 runs. Curriculum is excluded: it changes the maze size, and a seed only reproduces a maze at one size |
+| Training | seed `42`, 40 repeats per condition (run-ids `_r1`-`_r40`). The repeats catch failed trainings (reward stuck at 0), so report the training success rate; they differ only by run-to-run nondeterminism, not by seed |
+| Conditions | Vector, Raycast, Hybrid-Abs, Hybrid-Rel, no curriculum = 4 x 40 = 160 runs. Curriculum is excluded: it changes the maze size, and a seed only reproduces a maze at one size |
 
 The Seen pool is small on purpose: one training run only draws about 500 mazes, so a pool of 1000 would leave most "seen"
 mazes never actually trained on. Item 3 (`jobs_training_stability.txt`, Random mode) is separate and not reused here.
