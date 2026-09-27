@@ -57,7 +57,7 @@ public class MazeConstructor : MonoBehaviour
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
-    public void GenerateAllMazes(int sizeRows, int sizeCols)
+    public void GenerateAllMazes(int sizeRows, int sizeCols, System.Func<int> seedProvider = null)
     {
         if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
         {
@@ -71,7 +71,9 @@ public class MazeConstructor : MonoBehaviour
         {
             DisposeSingleOldMaze(envi.GetSiblingIndex());
 
-            data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+            data = seedProvider != null
+                ? dataGenerator.FromDimensions(sizeRows, sizeCols, seedProvider())
+                : dataGenerator.FromDimensions(sizeRows, sizeCols);
 
             DisplaySingleMaze(envi.GetSiblingIndex());
 
@@ -86,7 +88,7 @@ public class MazeConstructor : MonoBehaviour
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
     /// <param name="environment"></param>
-    public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment)
+    public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment, int? seed = null)
     {
         if(environment >= environments.Length || environment < 0) return;
 
@@ -100,7 +102,9 @@ public class MazeConstructor : MonoBehaviour
 
         DisposeSingleOldMaze(environment);
 
-        data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        data = seed.HasValue
+            ? dataGenerator.FromDimensions(sizeRows, sizeCols, seed.Value)
+            : dataGenerator.FromDimensions(sizeRows, sizeCols);
 
         DisplaySingleMaze(environment);
 
@@ -113,7 +117,7 @@ public class MazeConstructor : MonoBehaviour
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
-    public void GenerateExaminationMazes(int sizeRows, int sizeCols)
+    public void GenerateExaminationMazes(int sizeRows, int sizeCols, int? seed = null)
     {
         if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
         {
@@ -125,7 +129,9 @@ public class MazeConstructor : MonoBehaviour
         rows = sizeRows;
         cols = sizeCols;
 
-        data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+        data = seed.HasValue
+            ? dataGenerator.FromDimensions(sizeRows, sizeCols, seed.Value)
+            : dataGenerator.FromDimensions(sizeRows, sizeCols);
 
         DisplayExaminationMazes();
 

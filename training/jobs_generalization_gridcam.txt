@@ -1,0 +1,8 @@
+# Generalization Gap (Item 4), Grid and Camera sensors: same design as chiheo/jobs_generalization.txt
+# (Seen pool seeds 0-49, no curriculum, training seed 42, 40 repeats per condition to catch failed
+# trainings). Built from branch chiheo-gridcam (Moonnight's Grid/Camera setup + this seed logic).
+# Format: name  config  executable  [extra args]   (consumed by run_queue.sh on the shared server)
+# Grid has no camera to render, so --no-graphics is safe. Camera MUST NOT use --no-graphics
+# (it needs the desktop / DISPLAY=:1 to render what CameraSensor captures).
+gen_grid_seed42_r1             config/MazeConfigSeen.yaml  Grid/MazeGrid.x86_64      --seed=42 --no-graphics
+gen_camera_seed42_r1           config/MazeConfigSeen.yaml  Camera/MazeCamera.x86_64  --seed=42

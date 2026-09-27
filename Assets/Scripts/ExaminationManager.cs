@@ -34,8 +34,18 @@ public class ExaminationManager : MonoBehaviour
     [SerializeField]
     private Text timeText;
 
+    private GameController gameController;
+
+    /// <summary>
+    /// In Seen/Unseen mode each row also records the maze seed, so results from different models
+    /// can be checked (and paired) maze by maze. The default Random mode keeps the old columns.
+    /// </summary>
+    private bool IncludeSeed => gameController != null && gameController.SeedMode != GameController.MazeSeedMode.Random;
+
     void Start()
     {
+        gameController = FindObjectOfType<GameController>();
+
         GameObject canvas = GameObject.Find("Canvas");
 
         scoreTexts = canvas.transform.GetComponentsInChildren<Text>();
@@ -135,7 +145,7 @@ public class ExaminationManager : MonoBehaviour
     /// </summary>
     private void WriteFinishedRunsToFile()
     {
-        string fileName = "ExaminationTimes.csv";
+        string fileName = GetFileName();
         StreamWriter sw;
         if(File.Exists(fileName))
         {
@@ -172,8 +182,29 @@ public class ExaminationManager : MonoBehaviour
                 line += ",";
             }
         }
+        if(IncludeSeed) line += "," + gameController.LastSeed;
         sw.WriteLine(line);
-        
+
+    }
+
+    /// <summary>
+    /// Names the output file after the GameController's maze seed mode, so a Seen-maze
+    /// evaluation pass and an Unseen-maze pass land in separate files. Falls back to the
+    /// original unsuffixed name when no GameController is found or it's in Random mode.
+    /// </summary>
+    private string GetFileName()
+    {
+        if(gameController == null) return "ExaminationTimes.csv";
+
+        switch(gameController.SeedMode)
+        {
+            case GameController.MazeSeedMode.Seen:
+                return "ExaminationTimes_Seen.csv";
+            case GameController.MazeSeedMode.Unseen:
+                return "ExaminationTimes_Unseen.csv";
+            default:
+                return "ExaminationTimes.csv";
+        }
     }
 
     /// <summary>
@@ -212,6 +243,7 @@ public class ExaminationManager : MonoBehaviour
                 line += ",";
             }
         }
+        if(IncludeSeed) line += ",Seed";
         sw.WriteLine(line);
     }
 
